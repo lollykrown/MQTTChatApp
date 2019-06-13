@@ -1,5 +1,8 @@
 package com.lollykrown.mqttchatapp;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 /**
  * a simple interfaces holding connection constants.
  */
@@ -7,6 +10,6 @@ package com.lollykrown.mqttchatapp;
 public interface Config {
     //url - http://www.mqtt-dashboard.com/
     String MQTT_BROKER_URL = "tcp://35.157.173.121:1883";
-    String TOPIC = "MQTTTesting";
-    String CLIENT_ID = "M9EUlWfkJy";
+    //String TOPIC = "MQTTChatTest";
+    //String CLIENT_ID = "M9EUlWfkJy";
 }

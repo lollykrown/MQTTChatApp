@@ -3,4 +3,11 @@
     <string name="send_message">Send</string>
     <string name="message_hint">Type your message here</string>
     <string name="clear">Clear</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_submit">Submit</string>
+    <string name="client_id">Client ID</string>
+    <string name="label_type_the_client_id">Enter Client Id</string>
+    <string name="change_client_id">Change Client ID</string>
+    <string name="sub_topic">Subscription Topic</string>
+    <string name="label_type_sub_topic">Enter a Topic</string>
 </resources>

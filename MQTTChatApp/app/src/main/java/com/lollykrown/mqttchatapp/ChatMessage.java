@@ -1,7 +1,5 @@
 package com.lollykrown.mqttchatapp;
-/**
-* Object
- */
+
 public class ChatMessage {
 
     private String message;

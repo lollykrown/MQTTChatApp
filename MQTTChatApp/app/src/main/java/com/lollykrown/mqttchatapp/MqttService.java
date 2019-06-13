@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
@@ -30,10 +31,16 @@ public class MqttService extends Service {
     // LocalBroadcastManager for the Service
     private LocalBroadcastManager mLocalBroadcastManager;
 
+    SharedPreferences sp;
+    String topic;
+
     @Override
     public void onCreate() {
         super.onCreate();
         Log.d(TAG, "onCreate");
+
+        sp = getApplicationContext().getSharedPreferences("topic_sp", Context.MODE_PRIVATE);
+        topic = sp.getString("topic", "default");
 
         // instantiate LocalBroadcastManager
         mLocalBroadcastManager = LocalBroadcastManager.getInstance(this);
@@ -64,33 +71,35 @@ public class MqttService extends Service {
      */
     private void connectAndSubscribe() {
 
+        SharedPreferences sp = getApplicationContext().getSharedPreferences("clientid_sp", Context.MODE_PRIVATE);
+        String clientid = sp.getString("clientid", "default");
         // connect to server
         mMqttClient = MqttConnectionFactory.newClient(getApplicationContext(),
                 Config.MQTT_BROKER_URL,
-                Config.CLIENT_ID);
+                clientid);
 
         mMqttClient.setCallback(new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
 
                 // connection was successful
-                String greetMsg = "Connected to " + serverURI;
-                Toast.makeText(getApplicationContext(), greetMsg, Toast.LENGTH_SHORT).show();
-                Log.d(TAG, greetMsg);
+                String url = "Connected to " + serverURI;
+                Toast.makeText(getApplicationContext(), url, Toast.LENGTH_SHORT).show();
+                Log.d(TAG, url);
 
                 try {
-                    mMqttClient.subscribe(Config.TOPIC, 0, null,
+                    mMqttClient.subscribe(topic, 0, null,
                             new IMqttActionListener() {
                                 @Override
                                 public void onSuccess(IMqttToken asyncActionToken) {
                                     Log.d(TAG, "Subscribed successfully to topic "
-                                            + Config.TOPIC);
+                                            + topic);
                                 }
 
                                 @Override
                                 public void onFailure(IMqttToken asyncActionToken,
                                                       Throwable exception) {
-                                    Log.e(TAG, "Subscribe failed for topic " + Config.TOPIC);
+                                    Log.e(TAG, "Subscribe failed for topic " + topic);
                                 }
                             });
 
@@ -137,8 +146,8 @@ public class MqttService extends Service {
         }
 
         try {
-            MqttConnectionFactory.publishMessage(mMqttClient, msg, 1, Config.TOPIC);
-            Log.d(TAG, "Published " + msg + " for topic: " + Config.TOPIC);
+            MqttConnectionFactory.publishMessage(mMqttClient, msg, 1, topic);
+            Log.d(TAG, "Published " + msg + " for topic: " + topic);
         }
         catch (UnsupportedEncodingException e) {
             String errMsg = "Unsupported encoding ";

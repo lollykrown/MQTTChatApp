@@ -5,4 +5,8 @@
         android:id="@+id/clear"
         android:title="@string/clear"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/clientid"
+        android:title="@string/change_client_id"
+        app:showAsAction="ifRoom"/>
 </menu>

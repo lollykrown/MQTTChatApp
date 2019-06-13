@@ -4,23 +4,26 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Parcelable;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -33,14 +36,18 @@ public class MainActivity extends AppCompatActivity {
     Parcelable listState;
 
     // Views
-    private RecyclerView mMessageRecyclerView;
+    private ListView listView;
     private MessageAdapter mMessageAdapter;
     private EditText mMessageEditText;
     private Button mSendButton;
 
     // LocalBroadcastManager for the Activity
     private LocalBroadcastManager mLocalBroadcastManager;
-    private LinearLayoutManager mLayoutManager;
+
+    EditText editText;
+    Button button1;
+    Button button2;
+    final ArrayList<ChatMessage> friendlyMessages = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,15 +55,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mMessageEditText = findViewById(R.id.messageEditText);
-        mMessageRecyclerView = findViewById(R.id.messageRv);
-        mSendButton = findViewById(R.id.sendButton);
+        subcribeToATopic();
 
-        // Initialize message RecyclerView and its adapter
-        final ArrayList<ChatMessage> friendlyMessages = new ArrayList<>();
-        mLayoutManager = new LinearLayoutManager (this);
-        mMessageRecyclerView.setLayoutManager(mLayoutManager);
-        mMessageRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mMessageEditText = findViewById(R.id.messageEditText);
+        listView = findViewById(R.id.messageRv);
+
+        mSendButton = findViewById(R.id.sendButton);
 
         mMessageEditText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -97,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
                 ChatMessage friendlyMessage = new ChatMessage(msg);
                 friendlyMessages.add(friendlyMessage);
                 mMessageAdapter = new MessageAdapter(getApplicationContext(), friendlyMessages);
-                mMessageRecyclerView.setAdapter(mMessageAdapter);
+                listView.setAdapter(mMessageAdapter);
             }
 
         }, new IntentFilter(Actions.ACTION_RECEIVE_MESSAGE));
@@ -124,6 +128,18 @@ public class MainActivity extends AppCompatActivity {
 
         // Start service
         startService(new Intent(this, MqttService.class));
+
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view,
+                                           int position, long id) {
+                Toast.makeText(MainActivity.this, "message Deleted", Toast.LENGTH_LONG).show();
+                friendlyMessages.remove(position);
+                mMessageAdapter.notifyDataSetChanged();
+                return true;
+            }
+
+        });
     }
 
     @Override
@@ -154,6 +170,75 @@ public class MainActivity extends AppCompatActivity {
 //        }
 //    }
 
+    public void subcribeToATopic(){
+
+        final AlertDialog dialogBuilder = new AlertDialog.Builder(this).create();
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.custom_dialog2, null);
+
+        editText = dialogView.findViewById(R.id.edt_comment);
+        button1 = dialogView.findViewById(R.id.buttonSubmit);
+        button2 = dialogView.findViewById(R.id.buttonCancel);
+
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialogBuilder.dismiss();
+            }
+        });
+        button1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // DO SOMETHINGS
+                String topicSub = editText.getText().toString().trim();
+
+                SharedPreferences sp = getApplicationContext().getSharedPreferences("topic_sp", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putString("topic", topicSub);
+                editor.apply();
+                dialogBuilder.dismiss();
+
+            }
+        });
+
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.show();
+    }
+
+    public void changeClientId(){
+
+        final AlertDialog dialogBuilder = new AlertDialog.Builder(this).create();
+        LayoutInflater inflater = this.getLayoutInflater();
+        View dialogView = inflater.inflate(R.layout.custom_dialog, null);
+
+        editText = dialogView.findViewById(R.id.edt_comment);
+        button1 = dialogView.findViewById(R.id.buttonSubmit);
+        button2 = dialogView.findViewById(R.id.buttonCancel);
+
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialogBuilder.dismiss();
+            }
+        });
+        button1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // DO SOMETHINGS
+                String clientID = editText.getText().toString().trim();
+
+                SharedPreferences sp = getApplicationContext().getSharedPreferences("clientid_sp", Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
+                editor.putString("clientid", clientID);
+                editor.apply();
+                dialogBuilder.dismiss();
+
+            }
+        });
+
+        dialogBuilder.setView(dialogView);
+        dialogBuilder.show();
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -165,8 +250,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.clientid:
+                changeClientId();
+                return true;
             case R.id.clear:
-                mMessageRecyclerView.setAdapter(null);
+                mMessageAdapter.clear();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

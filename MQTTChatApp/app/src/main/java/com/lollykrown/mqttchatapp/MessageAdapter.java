@@ -5,56 +5,31 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import java.util.List;
+import java.util.ArrayList;
 
-public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MessageViewHolder>{
+public class MessageAdapter extends ArrayAdapter<ChatMessage> {
 
-    // ... constructor and member variables
-    Context mContext;
-    List<ChatMessage> mMessage;
-
-    public MessageAdapter(Context context, List<ChatMessage> message) {
-        mContext = context;
-        mMessage = message;
+    public MessageAdapter(Context context, ArrayList<ChatMessage> messages) {
+        super(context, 0, messages);
     }
 
     @Override
-    public MessageViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        Context context = viewGroup.getContext();
-        int layoutIdForListItem = R.layout.item_message;
-        LayoutInflater inflater = LayoutInflater.from(context);
-        boolean shouldAttachToParentImmediately = false;
-
-        View view = inflater.inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately);
-
-        return new MessageViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(MessageViewHolder holder, int i) {
-
-        ChatMessage m = mMessage.get(i);
-        holder.messageTv.setText(m.getMessage());
-
-    }
-
-    @Override
-    public int getItemCount() {
-        return mMessage.size();
-    }
-
-    class MessageViewHolder extends RecyclerView.ViewHolder {
-
-        //member variable
-        TextView messageTv;
-
-        public MessageViewHolder(final View itemView) {
-            super(itemView);
-
-            messageTv = itemView.findViewById(R.id.messageTextView);
+    public View getView(int position, View convertView, ViewGroup parent) {
+        // Get the data item for this position
+        ChatMessage mssg = getItem(position);
+        // Check if an existing view is being reused, otherwise inflate the view
+        if (convertView == null) {
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.item_message, parent, false);
         }
-    }
+        // Lookup view for data population
+        TextView tv = convertView.findViewById(R.id.messageTextView);
 
+        // Populate the data into the template view using the data object
+        tv.setText(mssg.getMessage());
+        // Return the completed view to render on screen
+        return convertView;
+    }
 }
