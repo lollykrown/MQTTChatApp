@@ -1,5 +1,6 @@
 # MQTTChatApp
-An app that make use of MQTT protocol. Eclipse paho mqtt library for android and HiveMQ broker were used
+An app that make use of MQTT protocol. <br/>
+Eclipse paho mqtt library for android and HiveMQ broker were used
 
 <hr/>
 <ul>
